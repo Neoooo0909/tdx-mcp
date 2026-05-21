@@ -92,6 +92,18 @@ pip install -e .
 claude mcp add tdx-mcp tdx-mcp
 ```
 
+### 4. 安装 Skill（可选）
+
+Skill 文件让 AI Agent 知道何时自动调用 TDX 工具及每个工具的参数含义。
+
+```bash
+mkdir -p ~/.claude/skills/tdx
+curl -o ~/.claude/skills/tdx/SKILL.md \
+  https://raw.githubusercontent.com/Neoooo0909/tdx-mcp/main/skill/SKILL.md
+```
+
+安装后，Agent 在遇到 A 股行情、K 线、财务等请求时会自动选择正确的 MCP 工具。
+
 ---
 
 ## 代码格式
