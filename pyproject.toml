@@ -16,15 +16,15 @@ classifiers = [
 dependencies = [
     "eltdx>=0.5.0",
     "mcp[cli]>=1.0.0",
-    "tdxapi @ git+https://github.com/mickey3721/TDXDataFetcher.git",
+    "tdxapi @ git+https://github.com/Neoooo0909/TDXDataFetcher.git",
 ]
 
 [project.scripts]
 tdx-mcp = "tdx_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/mickey3721/tdx-mcp"
-Repository = "https://github.com/mickey3721/tdx-mcp"
+Homepage = "https://github.com/Neoooo0909/tdx-mcp"
+Repository = "https://github.com/Neoooo0909/tdx-mcp"
 
 [build-system]
 requires = ["hatchling"]

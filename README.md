@@ -48,13 +48,13 @@
 ### 1. 安装
 
 ```bash
-pip install git+https://github.com/mickey3721/tdx-mcp.git
+pip install git+https://github.com/Neoooo0909/tdx-mcp.git
 ```
 
 或者克隆后本地安装：
 
 ```bash
-git clone https://github.com/mickey3721/tdx-mcp.git
+git clone https://github.com/Neoooo0909/tdx-mcp.git
 cd tdx-mcp
 pip install -e .
 ```
