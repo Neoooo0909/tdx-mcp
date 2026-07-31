@@ -5,7 +5,7 @@
 
 import struct
 from datetime import datetime, timedelta
-from tdxapi.models import StockQuote, Bar, Tick
+from ..models import StockQuote, Bar, Tick
 
 
 def _get_price(data: bytes, pos: int) -> tuple:

@@ -31,7 +31,14 @@
 | `tdx_get_factors` | 前/后复权因子序列 |
 | `tdx_get_turnover` | 换手率计算 |
 
-### tdxapi 补充工具（5 个）
+### TDX 协议补充工具（5 个）
+
+> 这 5 个工具由内置的 TDX 协议实现（源自 TDXDataFetcher）驱动，位于
+> `tdx_mcp/_tdxapi/`。**它不占用顶层包名 `tdxapi`**——PyPI 上已有一个完全无关的
+> 同名包（TeamDynamix API wrapper），早期版本 vendored 成顶层 `tdxapi` 会与之互相
+> 遮蔽，导致这 5 个工具在调用时抛 `missing 1 required positional argument:
+> 'organization'`（而 18 个 eltdx 工具一切正常，极易误判）。现已改为私有子包。
+
 
 | 工具名 | 说明 |
 |--------|------|
@@ -148,7 +155,12 @@ tdx_get_futures_quote(code="IF2506", market=7)
 - **实时性**：行情数据延迟约 3 秒
 - **K 线周期**：`1min` / `5min` / `15min` / `30min` / `60min` / `day` / `week` / `month`
 - **复权方式**：`qfq`（前复权）/ `hfq`（后复权）/ `None`（不复权）
-- **依赖**：`eltdx >= 0.5.0`，`mcp[cli] >= 1.0.0`，Python >= 3.11
+- **依赖**：`eltdx >= 0.5.0, < 1.0`，`mcp[cli] >= 1.0.0, < 2.0`，Python >= 3.11
+
+> **上限必须锁死**：`eltdx` 1.x 把 `eltdx.mcp_server.create_server()` 换成了
+> `eltdx.mcp.create_mcp_server()`，工具集也从 18 个缩到 10 个、名称全变；
+> `mcp` 2.x 则移除了 `mcp.server.fastmcp`。任一放开上限，全新安装都会拉到新版
+> 而**服务根本起不来**。适配 eltdx 1.x 需按新 API 重做工具层并同步本文工具表。
 
 ---
 

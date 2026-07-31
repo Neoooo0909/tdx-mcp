@@ -10,7 +10,7 @@ import struct
 import threading
 from typing import Optional
 
-from tdxapi.protocol.constants import (
+from ..protocol.constants import (
     DEFAULT_SERVERS,
     RSP_HEADER_LEN,
     Category,
@@ -20,7 +20,7 @@ from tdxapi.protocol.constants import (
     CONNECT_TIMEOUT,
     HEARTBEAT_INTERVAL,
 )
-from tdxapi.protocol.requests import (
+from ..protocol.requests import (
     build_quote_request,
     build_bars_request,
     build_stock_count_request,
@@ -32,9 +32,9 @@ from tdxapi.protocol.requests import (
     build_xdxr_request,
     build_finance_request,
 )
-from tdxapi.protocol.packet import RspHeader, _recv_exact
-from tdxapi.parser import parse_quotes, parse_bars, parse_ticks
-from tdxapi.parser.quote_parser import (
+from ..protocol.packet import RspHeader, _recv_exact
+from ..parser import parse_quotes, parse_bars, parse_ticks
+from ..parser.quote_parser import (
     parse_minute_time,
     parse_history_minute_time,
     parse_security_list,
@@ -42,7 +42,7 @@ from tdxapi.parser.quote_parser import (
     parse_xdxr_info,
     parse_finance_info,
 )
-from tdxapi.models import StockQuote, Bar, Tick
+from ..models import StockQuote, Bar, Tick
 
 
 class TdxClient:
@@ -127,7 +127,7 @@ class TdxClient:
 
     def _heartbeat_loop(self):
         """心跳循环"""
-        from tdxapi.protocol.requests import build_heartbeat_request
+        from ..protocol.requests import build_heartbeat_request
 
         while not self._heartbeat_stop.wait(HEARTBEAT_INTERVAL):
             try:
@@ -327,7 +327,7 @@ class TdxClient:
         start: int = 0,
     ) -> list[Bar]:
         """获取指数K线"""
-        from tdxapi.protocol.requests import build_index_bars_request
+        from ..protocol.requests import build_index_bars_request
 
         m = 1 if market.upper() == "SH" else 0
         period_map = {"1d": 9, "5m": 0, "15m": 1, "30m": 2, "60m": 3}
@@ -396,7 +396,7 @@ class TdxClient:
         count: int = 100,
     ) -> list[Tick]:
         """获取历史分笔成交"""
-        from tdxapi.protocol.requests import build_history_transaction_request
+        from ..protocol.requests import build_history_transaction_request
 
         m = 1 if market.upper() == "SH" else 0
         import datetime
@@ -438,7 +438,7 @@ class TdxClient:
         self, region: int, start: int = 0, count: int = 100
     ) -> list[dict]:
         """按板块获取股票列表"""
-        from tdxapi.protocol.requests import build_security_list_request
+        from ..protocol.requests import build_security_list_request
 
         results = []
         pos = start
@@ -472,8 +472,8 @@ class TdxClient:
 
     def get_company_info_category(self, code: str, market: str = "SH") -> list[dict]:
         """获取公司信息目录"""
-        from tdxapi.protocol.requests import build_company_info_category_request
-        from tdxapi.parser import parse_company_info_category
+        from ..protocol.requests import build_company_info_category_request
+        from ..parser import parse_company_info_category
 
         m = self._parse_market(market)
         body = build_company_info_category_request(m, code)
@@ -489,8 +489,8 @@ class TdxClient:
         length: int = 6000,
     ) -> bytes:
         """获取公司信息内容"""
-        from tdxapi.protocol.requests import build_company_info_content_request
-        from tdxapi.parser import parse_company_info_content
+        from ..protocol.requests import build_company_info_content_request
+        from ..parser import parse_company_info_content
 
         m = self._parse_market(market)
         body = build_company_info_content_request(m, code, filename, start, length)
@@ -499,8 +499,8 @@ class TdxClient:
 
     def get_block_info_meta(self, blockfile: str = "block.dat") -> dict:
         """获取板块信息元数据"""
-        from tdxapi.protocol.requests import build_block_info_meta_request
-        from tdxapi.parser import parse_block_info_meta
+        from ..protocol.requests import build_block_info_meta_request
+        from ..parser import parse_block_info_meta
 
         body = build_block_info_meta_request(blockfile)
         resp = self._send_recv(body)
@@ -510,8 +510,8 @@ class TdxClient:
         self, blockfile: str = "block.dat", start: int = 0, size: int = 100
     ) -> list[dict]:
         """获取板块信息内容"""
-        from tdxapi.protocol.requests import build_block_info_request
-        from tdxapi.parser import parse_block_info
+        from ..protocol.requests import build_block_info_request
+        from ..parser import parse_block_info
 
         body = build_block_info_request(blockfile, start, size)
         resp = self._send_recv(body)

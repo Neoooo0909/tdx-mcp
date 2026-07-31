@@ -3,7 +3,15 @@ tdx-mcp MCP 服务入口
 
 包含两个后端的完整工具集：
   - eltdx 原生 18 个工具（行情、K线、分时、逐笔、股本、复权等）
-  - tdxapi 补充 5 个工具（财务数据、指数行情、期货行情、板块、公司信息）
+  - _tdxapi 补充 5 个工具（财务数据、指数行情、期货行情、板块、公司信息）
+
+TDX 协议实现（源自 TDXDataFetcher）内置在 ``tdx_mcp._tdxapi``，**不占用顶层
+包名**。曾经它被 vendored 成顶层 ``tdxapi``，而 PyPI 上已有一个完全无关的同名包
+（TeamDynamix API wrapper，构造函数为 ``TdxClient(organization, ...)``），
+两者互相遮蔽：装了那个包的用户，这里 5 个工具会在**调用时**抛
+``missing 1 required positional argument: 'organization'``（import 阶段毫无征兆，
+而 18 个 eltdx 工具一切正常，极易误判成"某几个接口坏了"）；反过来本包也会
+盖掉别人真正需要的 TeamDynamix 包。改为私有子包后该冲突从根上不存在。
 """
 from __future__ import annotations
 
@@ -11,14 +19,9 @@ from typing import Any
 
 
 def _tdxapi_client():
-    """创建并连接一个 tdxapi 客户端（调用方负责 close）"""
-    try:
-        from tdxapi import TdxClient
-    except ImportError as exc:
-        raise ImportError(
-            "tdxapi 未安装，请运行：\n"
-            "  pip install git+https://github.com/mickey3721/TDXDataFetcher.git"
-        ) from exc
+    """创建并连接一个 TDX 协议客户端（调用方负责 close）"""
+    from ._tdxapi import TdxClient
+
     client = TdxClient()
     client.connect()
     return client

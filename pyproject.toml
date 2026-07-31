@@ -14,8 +14,16 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
 ]
 dependencies = [
-    "eltdx>=0.5.0",
-    "mcp[cli]>=1.0.0",
+    # 必须锁 <1.0：eltdx 1.x 把 `eltdx.mcp_server.create_server()` 换成了
+    # `eltdx.mcp.create_mcp_server()`，且工具集从 18 个缩到 10 个、名称全变。
+    # 原先写 `>=0.5.0` 时，全新安装会拉到 1.2.0，于是 create_server() 直接
+    # ModuleNotFoundError，**MCP 服务根本起不来**（2026-07-31 在干净 venv 实测）。
+    # 若要支持 eltdx 1.x，需按新 API 重做工具层并同步更新 README 的工具表。
+    "eltdx>=0.5.0,<1.0",
+    # 同样必须锁 <2.0：mcp 2.x 移除了 `mcp.server.fastmcp`，而 eltdx 0.5.x 的
+    # mcp_server 正是 `from mcp.server.fastmcp import FastMCP`。原先写
+    # `>=1.0.0` 时全新安装会拉到 2.0.0，服务同样起不来（干净 venv 实测）。
+    "mcp[cli]>=1.0.0,<2.0",
 ]
 
 [project.scripts]
@@ -30,4 +38,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tdx_mcp", "src/tdxapi"]
+# 只发布 tdx_mcp 一个顶层包。TDX 协议实现内置在 tdx_mcp/_tdxapi/，
+# 绝不再以顶层 `tdxapi` 名义安装——那个名字在 PyPI 上已被一个无关的
+# TeamDynamix API wrapper 占用，双方会互相遮蔽（详见 src/tdx_mcp/server.py）。
+packages = ["src/tdx_mcp"]
