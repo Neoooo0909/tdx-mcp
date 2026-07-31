@@ -162,22 +162,19 @@ class TdxClient:
         else:
             actual_size = header.zip_size
 
-        body_buf = bytearray()
-        while True:
-            remaining = actual_size - len(body_buf)
-            if remaining <= 0:
-                break
-            chunk = self._sock.recv(min(remaining, 8192))
-            if not chunk:
-                if len(body_buf) > 0:
-                    break
-                raise ConnectionError("连接断开")
-            body_buf.extend(chunk)
-            if len(chunk) < remaining:
-                actual_size = len(body_buf)
-                break
-
-        body = bytes(body_buf)
+        # body 必须收满 actual_size 才算完整。
+        #
+        # 旧写法在 `len(chunk) < remaining` 时直接 `actual_size = len(body_buf); break`
+        # ——把 **TCP 的短读当成了响应结束**。短读在数据跨包时完全正常，后果有二：
+        # ① body 被截断；② 响应剩余字节留在 socket 缓冲区，污染之后每一次读取
+        # （协议流失步）。小响应总在一个 TCP 段里，所以这个 bug 长期不暴露；
+        # 一旦响应变大（多股批量、长 K 线、板块文件）就变成"第一次对、后续全乱"，
+        # 而且重连也不稳定修复——分包与否取决于当时的网络状况。
+        # 同一文件里 header 本来就用 _recv_exact 收满，body 却没有。
+        body = _recv_exact(self._sock, actual_size)
+        if len(body) < actual_size:
+            raise ConnectionError(
+                f"响应不完整: 期望 {actual_size} 字节，实收 {len(body)}")
         needs_decompress = header.zip_size < header.unzip_size
         if not needs_decompress and len(body) >= 2 and body[:2] == b"x\x9c":
             needs_decompress = True
